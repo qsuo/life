@@ -1,6 +1,7 @@
 #!/usr/bin/python3.6
 
 import os
+import random
 
 class Universe:
     DEAD = 0
@@ -19,10 +20,10 @@ class Universe:
     def console_output(self):
         for this_list in self.map:
             for elem in this_list:
-                if elem == Universe.DEAD:
-                    print('o', end=' ')
-                else:
-                    print('*', end=' ')
+                #if elem == Universe.DEAD:
+                print(elem, end=' ')
+                #else:
+                #print('1', end=' ')
             print()
 
     def file_input(self, this_file):
@@ -58,13 +59,20 @@ class Universe:
                 if self.map[i][j] == Universe.ALIVE and (alive != 3 and alive !=2):
                     self.map[i][j] = Universe.DEAD
     
+    def generate_random_map(self):
+        #random.seed()
+        for i, this_list in enumerate(self.map):
+            for j, elem in enumerate(this_list):
+                self.map[i][j] = random.randint(0, 1000000) % 2
+            
 
 
 
 def main():
-    universe = Universe()
-    f = open('init', 'r')
-    universe.file_input(f)
+    universe = Universe(10, 10)
+    universe.generate_random_map()
+    #f = open('init', 'r')
+    #universe.file_input(f)
     
     universe.console_output()
     print()
