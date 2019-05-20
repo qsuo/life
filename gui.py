@@ -1,11 +1,12 @@
 #!/usr/bin/python3.6
 
 import sys
+import os
 import time
 
 from PySide2.QtWidgets import QApplication, QLabel, QWidget, QGraphicsScene
 from PySide2.QtWidgets import QPushButton, QHBoxLayout, QVBoxLayout
-from PySide2.QtWidgets import QGraphicsView
+from PySide2.QtWidgets import QGraphicsView, QAbstractButton, QComboBox
 from PySide2.QtCore import Slot, SIGNAL
 from PySide2.QtCore import Qt, QRectF, QTimer
 
@@ -18,6 +19,18 @@ class MainWindow(QWidget):
 
         self.game = GameWidget(self)
 
+        self.box = QComboBox()
+        
+        maps = [elem for elem in os.listdir() if '.l' in elem]
+        for elem in maps:
+            self.box.addItem(elem)
+
+        self.buttonRandom = QPushButton('Random')
+        self.buttonRandom.clicked.connect(self.random) 
+
+        self.buttonLoad = QPushButton('Load')
+        self.buttonLoad.clicked.connect(self.load) 
+        
         self.buttonStep = QPushButton("Step")
         self.buttonStep.clicked.connect(self.game.step) 
 
@@ -26,18 +39,39 @@ class MainWindow(QWidget):
         
         self.buttonStop = QPushButton("Stop")
         self.buttonStop.clicked.connect(self.game.stop) 
-
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.game)
-        layout.addWidget(self.buttonStep)
-        layout.addWidget(self.buttonRun)
-        layout.addWidget(self.buttonStop)
-
-        self.setLayout(layout) 
-        self.setWindowTitle('LIFE')
-        self.setFixedSize(1000, 800)
         
+
+        self.child = QWidget(self)
+        childLayout = QHBoxLayout()
+        layout = QVBoxLayout()
+
+        layout.addWidget(self.game)
+        childLayout.addWidget(self.buttonRun)
+        childLayout.addWidget(self.buttonStop)
+        childLayout.addWidget(self.buttonStep)
+        
+        self.child.setLayout(childLayout)
+        layout.addWidget(self.child)
+        layout.addWidget(self.box)
+        layout.addWidget(self.buttonLoad)
+        layout.addWidget(self.buttonRandom)
+        self.setLayout(layout) 
+
+
+        self.setWindowTitle('LIFE')
+        self.setFixedSize(1500, 1000)
+    
+    def load(self):
+        item = self.box.currentText()
+        f = open(item, 'r')
+        self.game.load(f)
+        f.close()
+        self.game.drawUniverse()
+
+    def random(self):
+        self.game.universe.generate_random_map()
+        self.game.drawUniverse()
+
     def showEvent(self, event):
         self.game.drawUniverse()
 
@@ -46,19 +80,21 @@ class GameWidget(QGraphicsView):
         super(GameWidget, self).__init__(parent)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        
+        self.m = 150
+        self.n = 150
 
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.scene.setSceneRect(0, 0, self.width(), self.height())
         self.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-        self.universe = engine.Universe(100, 100)
-        self.universe.generate_random_map()
-        #self.scene.addRect(0, 0, 100, 100, brush=Qt.green) 
+        self.universe = engine.Universe(self.n, self.m)
 
+        print(Qt.red)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.step)
-        #self.timer.start()
+    
+    def load(self, item):
+         self.universe.file_input(item)
     
     def drawUniverse(self):
         width = self.width()
@@ -79,6 +115,7 @@ class GameWidget(QGraphicsView):
                 y += cellHeight
             x += cellWidth
     
+
     def step(self):
         self.scene.clear()
         self.universe.step()
@@ -91,16 +128,5 @@ class GameWidget(QGraphicsView):
     def stop(self):
         self.timer.stop()
 
-def main():
-    app = QApplication(sys.argv)
-    
-    window = MainWindow()
-    window.show()    
-
-    app.exec_()
-    
-    
-if __name__ == '__main__':
-    main()
 
 

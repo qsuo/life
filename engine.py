@@ -26,6 +26,7 @@ class Universe:
                 #print('1', end=' ')
             print()
 
+
     def file_input(self, this_file):
         self.map = list()
         for line in this_file:
@@ -33,6 +34,9 @@ class Universe:
             for val in line.split():
                 temp.append(int(val))
             self.map.append(temp)
+
+        self.n = len(self.map) - 1
+        self.m = len(self.map[0])
 
     def _count_neighbors(self, this_map, x, y): #TODO more optimized/pythonic way
         alive = 0
@@ -69,19 +73,18 @@ class Universe:
 
 
 def main():
-    universe = Universe(10, 10)
+    universe = Universe(1, 1)
     universe.generate_random_map()
-    #f = open('init', 'r')
-    #universe.file_input(f)
+    f = open('init.l', 'r')
+    universe.file_input(f)
     
-    universe.console_output()
+    print(universe.n)
+    #universe.console_output()
     print()
-    while True:
-        input()
-
-        os.system('clear')
-        universe.step()
-        universe.console_output()
+    #while True:
+     #   input()
+      #  universe.step()
+       # universe.console_output()
     
 
 if __name__ == '__main__':
